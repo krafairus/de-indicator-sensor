@@ -1,0 +1,13 @@
+[Desktop Entry]
+Categories=System;
+Comment=DE Indicator Sensor
+Comment[es]=DE Indicator Sensor
+Comment[pt_BR]=DE Indicator Sensor
+Exec=/usr/share/de-indicator-sensor/de-indicator-sensor
+Icon=/usr/share/icons/hicolor/scalable/apps/de-indicator-sensor.png
+Name=DE Indicator Sensor
+Name[es]=de-indicator-sensor.desktop
+Name[pt_BR]=DE Indicator Sensor
+StartupWMClass=de-indicator-sensor
+Type=Application
+X-Deepin-Vendor=user-custom

@@ -1,0 +1,12 @@
+# Crear archivo .ts para inglés
+pylupdate6 sensor-monitor.py -ts langs/de-indicator-sensor_en.ts
+
+# Crear archivo .ts para español
+pylupdate6 sensor-monitor.py -ts langs/de-indicator-sensor_es.ts
+
+# Crear archivo .ts para portugués
+pylupdate6 sensor-monitor.py -ts langs/de-indicator-sensor_pt.ts
+
+# Compilar español
+lrelease langs/de-indicator-sensor_es.ts -qm langs/de-indicator-sensor_es.qm && lrelease langs/de-indicator-sensor_en.ts -qm langs/de-indicator-sensor_en.qm && lrelease langs/de-indicator-sensor_pt.ts -qm langs/de-indicator-sensor_pt.qm
+

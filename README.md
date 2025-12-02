@@ -9,7 +9,7 @@ https://github.com/user-attachments/assets/f4e9750d-18b3-4a28-a585-7d79c4b4fd50
  -   English
 
 ### Compile binary:
-- pyinstaller --onefile --noconfirm --clean --strip -w --name "SensorMonitor" --icon=resources/appicon.png --add-data "resources:resources" --exclude-module tkinter --exclude-module unittest --exclude-module doctest --exclude-module pydoc --hidden-import PyQt6.QtCore --hidden-import PyQt6.QtGui --hidden-import PyQt6.QtWidgets main.py
+- pyinstaller --onefile --noconfirm --clean --strip -w --name "de-indicator-sensor" --icon=resources/appicon.png --add-data "resources:resources" --exclude-module tkinter --exclude-module unittest --exclude-module doctest --exclude-module pydoc --hidden-import PyQt6.QtCore --hidden-import PyQt6.QtGui --hidden-import PyQt6.QtWidgets main.py
 
 ### Compile Deb package:
 1. Create release file.

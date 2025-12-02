@@ -1,7 +1,6 @@
 # DE Indicator Sensor
 Program for monitoring temperatures and other system data for Deepin Linux.
-
-
+<img width="2000" height="1600" alt="l" src="https://github.com/user-attachments/assets/53515bba-e023-4111-979a-80945b5aeadf" />
 
 ### Video Test
 https://github.com/user-attachments/assets/8429b4e3-3621-435c-80e7-a0d1ea398ce0

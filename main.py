@@ -914,7 +914,7 @@ class SensorTrayIcon(QSystemTrayIcon):
             # Red
             if config.get("show_network_usage", True) and 'networks' in data:
                 # Añadir una etiqueta de título para Red
-                title_action = QAction(self.tr("🌐 Red:"), self)
+                title_action = QAction(self.tr("🌐 Red"), self)
                 title_action.setEnabled(False)
                 actions_list.append(title_action)
                     
@@ -973,7 +973,7 @@ class SensorTrayIcon(QSystemTrayIcon):
             
             # Procesos (Top 5)
             if config.get("show_processes", True) and 'processes' in data:
-                proc_title = QAction(self.tr("📊 Top 5 Procesos:"), self)
+                proc_title = QAction(self.tr("📊 Top 5 Procesos"), self)
                 proc_title.setEnabled(False)
                 actions_list.append(proc_title)
                 
@@ -1145,7 +1145,7 @@ class SensorDisplayWidget(QWidget):
             icon_label.setPixmap(QIcon.fromTheme(icon_name).pixmap(16, 16))
             header_layout.addWidget(icon_label)
         title_label = QLabel(f"<b>{title}</b>")
-        title_label.setStyleSheet("font-size: 12pt; color: #444;")
+        title_label.setStyleSheet("font-size: 12pt; color: #3D60E3;")
         header_layout.addWidget(title_label)
         header_layout.addStretch()
         self.main_layout.addWidget(header_widget)
@@ -1683,6 +1683,7 @@ class ConfigurationWindow(QMainWindow):
         self.create_display_tab()
         self.create_notifications_tab()
         self.create_advanced_tab()
+        self.create_about_tab()  # Nueva pestaña "Acerca de"
         
         # Botones
         button_layout = QHBoxLayout()
@@ -1794,6 +1795,33 @@ class ConfigurationWindow(QMainWindow):
         
         sensors_group.setLayout(sensors_layout)
         layout.addWidget(sensors_group)
+        
+        # NOTA INFORMATIVA - NUEVA SECCIÓN
+        info_group = QGroupBox(self.tr("Nota Informativa"))
+        info_layout = QVBoxLayout()
+        
+        info_label = QLabel(
+            self.tr("<b>Nota:</b> Algunas opciones pueden no funcionar si tu hardware no soporta "
+                "estas características.<br><br>"
+                "Usa el botón <i>'Detectar Sensores Disponibles'</i> en la pestaña <i>'Avanzado'</i> "
+                "para ver qué sensores están disponibles en tu sistema.")
+        )
+        info_label.setWordWrap(True)
+        info_label.setOpenExternalLinks(False)
+        info_label.setTextFormat(Qt.TextFormat.RichText)
+        info_label.setStyleSheet("""
+            QLabel {
+                background-color: #fff3cd;
+                border: 1px solid #ffeaa7;
+                border-radius: 5px;
+                padding: 10px;
+                color: #856404;
+            }
+        """)
+        
+        info_layout.addWidget(info_label)
+        info_group.setLayout(info_layout)
+        layout.addWidget(info_group)
         
         # Botón para renombrar sensores
         rename_group = QGroupBox(self.tr("Nombres de Sensores"))
@@ -1917,6 +1945,233 @@ class ConfigurationWindow(QMainWindow):
         
         layout.addStretch()
         self.tabs.addTab(tab, self.tr("Avanzado"))
+
+    def create_about_tab(self):
+        """Crea la pestaña Acerca de"""
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
+        
+        # Contenedor principal con márgenes
+        container = QWidget()
+        container_layout = QVBoxLayout(container)
+        container_layout.setSpacing(20)
+        
+        # Encabezado con logo y título
+        header_widget = QWidget()
+        header_layout = QHBoxLayout(header_widget)
+        header_layout.setSpacing(15)
+        
+        # Logo (intentar cargar desde recursos)
+        logo_label = QLabel()
+        logo_paths = [
+            get_resource_path("resources/appicon.png"),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "resources/appicon.png"),
+            get_resource_path("/usr/share/de-indicator-sensor/resources/appicon.png")
+        ]
+        
+        logo_loaded = False
+        for logo_path in logo_paths:
+            if os.path.exists(logo_path):
+                pixmap = QPixmap(logo_path)
+                if not pixmap.isNull():
+                    # Escalar la imagen manteniendo la relación de aspecto
+                    pixmap = pixmap.scaled(64, 64, Qt.AspectRatioMode.KeepAspectRatio, 
+                                         Qt.TransformationMode.SmoothTransformation)
+                    logo_label.setPixmap(pixmap)
+                    logo_loaded = True
+                    break
+        
+        if not logo_loaded:
+            # Usar ícono del tema como fallback
+            logo_label.setPixmap(QIcon.fromTheme("computer").pixmap(64, 64))
+        
+        header_layout.addWidget(logo_label)
+        
+        # Título y descripción
+        title_widget = QWidget()
+        title_layout = QVBoxLayout(title_widget)
+        
+        title_label = QLabel("<h2>DE Indicator Sensor</h2>")
+        title_label.setStyleSheet("font-weight: bold; color: #2ECC71;")
+        title_layout.addWidget(title_label)
+        
+        desc_label = QLabel(self.tr("Desarrollado por la comunidad de Deepin en Español."))
+        desc_label.setStyleSheet("font-weight: bold; color: #3D60E3;")
+        desc_label.setWordWrap(True)
+        title_layout.addWidget(desc_label)
+        
+        header_layout.addWidget(title_widget)
+        header_layout.addStretch()
+        container_layout.addWidget(header_widget)
+        
+        # Estilo para enlaces
+        link_style = "style='color:#2ECC71; text-decoration:none;'"
+        hover_style = "onmouseover=\"this.style.color='#27AE60'; this.style.textDecoration='underline'\" " \
+                     "onmouseout=\"this.style.color='#2ECC71'; this.style.textDecoration='none'\""
+        
+        # Información de desarrolladores
+        dev_group = QGroupBox(self.tr("Desarrolladores"))
+        dev_layout = QVBoxLayout()
+        
+        dev_text = self.tr("""
+            krafairus - <a href='https://xn--deepinenespaol-1nb.org/participant/krafairus' {0} {1}>deepines.com/participant/krafairus</a>
+        """).format(link_style, hover_style)
+        
+        dev_label = QLabel(dev_text)
+        dev_label.setOpenExternalLinks(True)
+        dev_label.setWordWrap(True)
+        dev_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        dev_layout.addWidget(dev_label)
+        
+        dev_group.setLayout(dev_layout)
+        container_layout.addWidget(dev_group)
+        
+        # Comunidad
+        community_group = QGroupBox(self.tr("Comunidad Deepin en Español"))
+        community_layout = QVBoxLayout()
+        
+        community_text = self.tr("""
+            <a href='https://xn--deepinenespaol-1nb.org' {0} {1}>www.deepines.com</a>
+        """).format(link_style, hover_style)
+        
+        community_label = QLabel(community_text)
+        community_label.setOpenExternalLinks(True)
+        community_label.setWordWrap(True)
+        community_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        community_layout.addWidget(community_label)
+        
+        community_group.setLayout(community_layout)
+        container_layout.addWidget(community_group)
+        
+        # Repositorio
+        repo_group = QGroupBox(self.tr("Repositorio"))
+        repo_layout = QVBoxLayout()
+        
+        repo_text = self.tr("""
+            <a href='https://github.com/krafairus/de-indicator-sensor' {0} {1}>https://github.com/krafairus/de-indicator-sensor</a>
+        """).format(link_style, hover_style)
+        
+        repo_label = QLabel(repo_text)
+        repo_label.setOpenExternalLinks(True)
+        repo_label.setWordWrap(True)
+        repo_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextBrowserInteraction)
+        repo_layout.addWidget(repo_label)
+        
+        repo_group.setLayout(repo_layout)
+        container_layout.addWidget(repo_group)
+        
+        # Licencia
+        license_group = QGroupBox(self.tr("Licencia"))
+        license_layout = QVBoxLayout()
+        
+        license_text = QTextEdit()
+        license_text.setReadOnly(True)
+        license_text.setMaximumHeight(120)
+        license_text.setHtml("""
+        <p>Este programa está bajo los términos de la <b>Licencia Pública General de GNU (GPL) versión 3</b>.</p>
+        <p>Puedes redistribuirlo y/o modificarlo bajo los términos de la Licencia Pública General de GNU
+        tal y como está publicada por la Free Software Foundation, ya sea la versión 3 de la Licencia,
+        o (a tu elección) cualquier versión posterior.</p>
+        """)
+        license_layout.addWidget(license_text)
+        
+        # Botón para ver la licencia completa
+        license_btn = QPushButton(self.tr("Ver texto completo de la licencia GPL v3"))
+        license_btn.clicked.connect(self.show_gpl_license)
+        license_layout.addWidget(license_btn)
+        
+        license_group.setLayout(license_layout)
+        container_layout.addWidget(license_group)
+        
+        # Versión (podría ser dinámica)
+        version_widget = QWidget()
+        version_layout = QHBoxLayout(version_widget)
+        
+        version_label = QLabel(self.tr("Versión: 1.0.0"))
+        version_label.setStyleSheet("color: #7f8c8d; font-size: 10pt;")
+        version_layout.addWidget(version_label)
+        
+        version_layout.addStretch()
+        
+        copyright_label = QLabel("© 2025 Comunidad Deepin en Español")
+        copyright_label.setStyleSheet("color: #7f8c8d; font-size: 9pt;")
+        version_layout.addWidget(copyright_label)
+        
+        container_layout.addWidget(version_widget)
+        
+        # Agregar scroll area si es necesario
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setWidget(container)
+        
+        layout.addWidget(scroll)
+        self.tabs.addTab(tab, self.tr("Acerca de"))
+
+    def show_gpl_license(self):
+        """Muestra el texto completo de la licencia GPL v3"""
+        license_dialog = QDialog(self)
+        license_dialog.setWindowTitle(self.tr("Licencia Pública General de GNU v3"))
+        license_dialog.setMinimumSize(700, 500)
+        
+        layout = QVBoxLayout(license_dialog)
+        
+        # Texto de la licencia GPL v3
+        license_text = QTextEdit()
+        license_text.setReadOnly(True)
+        
+        # Cargar la licencia desde un archivo si existe, o usar texto embebido
+        license_paths = [
+            get_resource_path("LICENSE"),
+            os.path.join(os.path.dirname(os.path.abspath(__file__)), "LICENSE"),
+            "/usr/share/common-licenses/GPL-3"
+        ]
+        
+        license_content = ""
+        for path in license_paths:
+            if os.path.exists(path):
+                try:
+                    with open(path, 'r', encoding='utf-8') as f:
+                        license_content = f.read()
+                    break
+                except:
+                    continue
+        
+        if not license_content:
+            # Texto resumido de la licencia si no se encuentra el archivo
+            license_content = """
+                    GNU GENERAL PUBLIC LICENSE
+                       Version 3, 29 June 2007
+
+ Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>
+ Everyone is permitted to copy and distribute verbatim copies
+ of this license document, but changing it is not allowed.
+
+                            Preamble
+
+  The GNU General Public License is a free, copyleft license for
+software and other kinds of works.
+
+  The licenses for most software and other practical works are designed
+to take away your freedom to share and change the works.  By contrast,
+the GNU General Public License is intended to guarantee your freedom to
+share and change all versions of a program--to make sure it remains free
+software for all its users.  We, the Free Software Foundation, use the
+GNU General Public License for most of our software; it applies also to
+any other work released this way by its authors.  You can apply it to
+your programs, too.
+
+  (Texto completo disponible en: https://www.gnu.org/licenses/gpl-3.0.html)
+            """
+        
+        license_text.setPlainText(license_content)
+        layout.addWidget(license_text)
+        
+        # Botones
+        button_box = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        button_box.rejected.connect(license_dialog.reject)
+        layout.addWidget(button_box)
+        
+        license_dialog.exec()
 
     def load_config(self):
         """Carga la configuración actual a la interfaz"""
@@ -2180,36 +2435,238 @@ StartupNotify=false
                 QMessageBox.critical(self, self.tr("Error"), self.tr(f"No se pudo importar:\n{e}"))
 
     def detect_sensors(self):
-        """Detecta sensores disponibles"""
+        """Detecta y muestra TODOS los sensores disponibles"""
         self.sensor_info.clear()
         self.sensor_info.append(self.tr("🔍 Detectando sensores..."))
+        
+        # Forzar actualización inmediata
+        QApplication.processEvents()
+        
         info = []
         
-        # Temperatura
+        # ======= 1. TEMPERATURAS =======
         temps = SensorReader.get_cpu_temperature()
         if temps:
-            info.append(self.tr("--- Temperaturas ---"))
+            info.append(self.tr("--- 🌡️ TEMPERATURAS ---"))
             for sensor_key, name, temp in temps:
-                info.append(f"  {name}: {temp:.1f}°C (ID: {sensor_key})")
-                
-        # Ventiladores
+                info.append(f"  • {name}: {temp:.1f}°C")
+                info.append(f"    ID: {sensor_key}")
+            info.append("")  # Línea en blanco
+        else:
+            info.append(self.tr("--- 🌡️ TEMPERATURAS ---"))
+            info.append(self.tr("  No se detectaron sensores de temperatura"))
+            info.append("")
+        
+        # ======= 2. VENTILADORES =======
         fans = SensorReader.get_fan_speed()
         if fans:
-            info.append(self.tr("\n--- Ventiladores ---"))
+            info.append(self.tr("--- 🌀 VENTILADORES ---"))
             for sensor_key, (name, speed) in fans.items():
-                info.append(f"  {name}: {speed} RPM (ID: {sensor_key})")
-                
-        # Voltajes
+                info.append(f"  • {name}: {speed} RPM")
+                info.append(f"    ID: {sensor_key}")
+            info.append("")
+        else:
+            info.append(self.tr("--- 🌀 VENTILADORES ---"))
+            info.append(self.tr("  No se detectaron ventiladores"))
+            info.append("")
+        
+        # ======= 3. VOLTAJES =======
         voltages = SensorReader.get_voltages()
         if voltages:
-            info.append(self.tr("\n--- Voltajes ---"))
+            info.append(self.tr("--- ⚡ VOLTAJES ---"))
             for sensor_key, (name, voltage) in voltages.items():
-                info.append(f"  {name}: {voltage:.2f} V (ID: {sensor_key})")
-        
-        if not info:
-            self.sensor_info.append(self.tr("\nNo se pudieron detectar sensores específicos (temperatura, ventiladores, voltajes). Se usarán estimaciones del sistema (CPU, RAM, Disco)."))
+                info.append(f"  • {name}: {voltage:.2f} V")
+                info.append(f"    ID: {sensor_key}")
+            info.append("")
         else:
+            info.append(self.tr("--- ⚡ VOLTAJES ---"))
+            info.append(self.tr("  No se detectaron sensores de voltaje"))
+            info.append("")
+        
+        # ======= 4. CPU =======
+        try:
+            cpu_info = SensorReader.get_cpu_info()
+            info.append(self.tr("--- ⚡ CPU (PROCESADOR) ---"))
+            info.append(self.tr(f"  • Núcleos lógicos: {cpu_info['count']}"))
+            info.append(self.tr(f"  • Núcleos físicos: {cpu_info['count_physical']}"))
+            
+            if cpu_info['freq'] and 'current' in cpu_info['freq']:
+                info.append(self.tr(f"  • Frecuencia actual: {cpu_info['freq']['current']:.0f} MHz"))
+                if 'min' in cpu_info['freq'] and 'max' in cpu_info['freq']:
+                    info.append(self.tr(f"  • Rango de frecuencia: {cpu_info['freq']['min']:.0f} - {cpu_info['freq']['max']:.0f} MHz"))
+            
+            # Mostrar uso por núcleo
+            if cpu_info.get('usage'):
+                info.append(self.tr(f"  • Uso por núcleo detectado: {len(cpu_info['usage'])} núcleos"))
+            
+            info.append("")
+        except Exception as e:
+            info.append(self.tr("--- ⚡ CPU (PROCESADOR) ---"))
+            info.append(self.tr(f"  Error al detectar CPU: {str(e)}"))
+            info.append("")
+        
+        # ======= 5. MEMORIA RAM =======
+        try:
+            mem_info = SensorReader.get_memory_info()
+            virtual = mem_info['virtual']
+            swap = mem_info['swap']
+            
+            info.append(self.tr("--- 💾 MEMORIA RAM ---"))
+            info.append(self.tr(f"  • RAM Total: {virtual['total'] / (1024**3):.2f} GB"))
+            info.append(self.tr(f"  • RAM Disponible: {virtual['available'] / (1024**3):.2f} GB"))
+            info.append(self.tr(f"  • RAM en Uso: {virtual['used'] / (1024**3):.2f} GB"))
+            
+            # Información detallada si está disponible
+            if virtual.get('buffers', 0) > 0:
+                info.append(self.tr(f"  • Buffers: {virtual['buffers'] / (1024**3):.2f} GB"))
+            if virtual.get('cached', 0) > 0:
+                info.append(self.tr(f"  • Caché: {virtual['cached'] / (1024**3):.2f} GB"))
+            
+            # Swap
+            if swap['total'] > 0:
+                info.append(self.tr(f"  • Swap Total: {swap['total'] / (1024**3):.2f} GB"))
+                info.append(self.tr(f"  • Swap en Uso: {swap['used'] / (1024**3):.2f} GB"))
+            else:
+                info.append(self.tr("  • Swap: No disponible"))
+            
+            info.append("")
+        except Exception as e:
+            info.append(self.tr("--- 💾 MEMORIA RAM ---"))
+            info.append(self.tr(f"  Error al detectar memoria: {str(e)}"))
+            info.append("")
+        
+        # ======= 6. DISCOS =======
+        try:
+            partitions = psutil.disk_partitions()
+            info.append(self.tr("--- 💿 DISCOS Y PARTICIONES ---"))
+            
+            if partitions:
+                for part in partitions:
+                    try:
+                        usage = psutil.disk_usage(part.mountpoint)
+                        info.append(self.tr(f"  • {part.mountpoint}"))
+                        info.append(self.tr(f"    Dispositivo: {part.device}"))
+                        info.append(self.tr(f"    Tipo: {part.fstype}"))
+                        info.append(self.tr(f"    Total: {usage.total / (1024**3):.2f} GB"))
+                        info.append(self.tr(f"    Usado: {usage.used / (1024**3):.2f} GB"))
+                        info.append(self.tr(f"    Libre: {usage.free / (1024**3):.2f} GB"))
+                        info.append(self.tr(f"    Uso: {usage.percent}%"))
+                    except:
+                        info.append(self.tr(f"  • {part.mountpoint} - No se pudo leer información"))
+            else:
+                info.append(self.tr("  No se detectaron particiones"))
+            
+            info.append("")
+        except Exception as e:
+            info.append(self.tr("--- 💿 DISCOS Y PARTICIONES ---"))
+            info.append(self.tr(f"  Error al detectar discos: {str(e)}"))
+            info.append("")
+        
+        # ======= 7. RED =======
+        try:
+            interfaces = psutil.net_if_addrs()
+            io_counters = psutil.net_io_counters(pernic=True)
+            
+            info.append(self.tr("--- 🌐 INTERFACES DE RED ---"))
+            
+            if interfaces:
+                for interface, addrs in interfaces.items():
+                    info.append(self.tr(f"  • {interface}"))
+                    
+                    # Direcciones de red
+                    for addr in addrs:
+                        if addr.family.name == 'AF_INET':
+                            info.append(self.tr(f"    IPv4: {addr.address}"))
+                            if addr.netmask:
+                                info.append(self.tr(f"      Máscara: {addr.netmask}"))
+                        elif addr.family.name == 'AF_INET6':
+                            info.append(self.tr(f"    IPv6: {addr.address}"))
+                        elif addr.family.name == 'AF_PACKET':
+                            info.append(self.tr(f"    MAC: {addr.address}"))
+                    
+                    # Estadísticas si están disponibles
+                    if interface in io_counters:
+                        io = io_counters[interface]
+                        info.append(self.tr(f"    Bytes enviados: {io.bytes_sent / (1024**2):.2f} MB"))
+                        info.append(self.tr(f"    Bytes recibidos: {io.bytes_recv / (1024**2):.2f} MB"))
+                    
+                    info.append("")  # Separador entre interfaces
+            else:
+                info.append(self.tr("  No se detectaron interfaces de red"))
+            
+            info.append("")
+        except Exception as e:
+            info.append(self.tr("--- 🌐 INTERFACES DE RED ---"))
+            info.append(self.tr(f"  Error al detectar red: {str(e)}"))
+            info.append("")
+        
+        # ======= 8. BATERÍA =======
+        try:
+            battery = SensorReader.get_battery_info()
+            info.append(self.tr("--- 🔋 BATERÍA ---"))
+            
+            if battery:
+                info.append(self.tr(f"  • Nivel de carga: {battery['percent']:.1f}%"))
+                info.append(self.tr(f"  • Estado: {'Conectada' if battery['power_plugged'] else 'Desconectada'}"))
+                
+                if battery['secsleft'] != psutil.POWER_TIME_UNLIMITED and battery['secsleft'] > 0:
+                    hours = battery['secsleft'] // 3600
+                    minutes = (battery['secsleft'] % 3600) // 60
+                    info.append(self.tr(f"  • Tiempo restante: {hours}h {minutes}m"))
+                elif battery['power_plugged']:
+                    info.append(self.tr("  • Tiempo restante: Ilimitado (conectada)"))
+                else:
+                    info.append(self.tr("  • Tiempo restante: Calculando..."))
+            else:
+                info.append(self.tr("  No se detectó batería (puede ser un sistema de escritorio)"))
+            
+            info.append("")
+        except Exception as e:
+            info.append(self.tr("--- 🔋 BATERÍA ---"))
+            info.append(self.tr(f"  Error al detectar batería: {str(e)}"))
+            info.append("")
+        
+        # ======= 9. SENSORES DEL SISTEMA =======
+        try:
+            # Usar lm-sensors si está disponible para información adicional
+            import subprocess
+            result = subprocess.run(['which', 'sensors'], capture_output=True, text=True)
+            if result.returncode == 0:
+                info.append(self.tr("--- 🔧 SENSORES DEL SISTEMA (lm-sensors) ---"))
+                info.append(self.tr("  • lm-sensors está instalado en el sistema"))
+                info.append(self.tr("  • Ejecuta 'sensors' en terminal para más detalles"))
+            else:
+                info.append(self.tr("--- 🔧 SENSORES DEL SISTEMA ---"))
+                info.append(self.tr("  • lm-sensors no está instalado"))
+                info.append(self.tr("  • Instálalo para más información de sensores: sudo apt install lm-sensors"))
+            
+            info.append("")
+        except:
+            pass
+        
+        # ======= 10. RESUMEN =======
+        info.append(self.tr("--- 📊 RESUMEN DE DETECCIÓN ---"))
+        
+        # Contar sensores detectados
+        temp_count = len(temps) if temps else 0
+        fan_count = len(fans) if fans else 0
+        voltage_count = len(voltages) if voltages else 0
+        
+        info.append(self.tr(f"  • Sensores de temperatura: {temp_count}"))
+        info.append(self.tr(f"  • Ventiladores: {fan_count}"))
+        info.append(self.tr(f"  • Sensores de voltaje: {voltage_count}"))
+        info.append(self.tr(f"  • Interfaces de red: {len(interfaces) if 'interfaces' in locals() else 'N/A'}"))
+        info.append(self.tr(f"  • Particiones de disco: {len(partitions) if 'partitions' in locals() else 'N/A'}"))
+        info.append(self.tr(f"  • Batería: {'Detectada' if battery else 'No detectada'}"))
+        
+        # Mostrar todos los sensores en el QTextEdit
+        if info:
             self.sensor_info.setText("\n".join(info))
+        else:
+            self.sensor_info.setText(self.tr("No se pudieron detectar sensores. Es posible que necesites instalar lm-sensors (sudo apt install lm-sensors) y ejecutar 'sudo sensors-detect'."))
+        
+        # Añadir nota final
+        self.sensor_info.append("\n" + self.tr("💡 Nota: Algunos sensores pueden requerir permisos de superusuario o la instalación de paquetes adicionales."))
 
 class MainWindow(QMainWindow):
     """Ventana principal del monitor de sensores"""
@@ -2348,7 +2805,6 @@ QProgressBar { border: 1px solid #555; border-radius: 3px; text-align: center; c
 QProgressBar::chunk { border-radius: 3px; }
 QTableWidget { background-color: #333; color: #ffffff; gridline-color: #555; }
 QHeaderView::section { background-color: #444; color: #ffffff; border: 1px solid #555; }
-QScrollArea { border: none; }
 QStatusBar { background-color: #333; color: #ffffff; }
 QTabWidget::pane { /* The tab widget frame */ border: 1px solid #555; background-color: #3a3a3a; }
 QTabWidget::tab-bar { left: 5px; /* move to the right */ }
@@ -2356,6 +2812,56 @@ QTabBar::tab { background: #444; border: 1px solid #555; border-bottom-color: #3
 QTabBar::tab:selected, QTabBar::tab:hover { background: #555; }
 QMenu { background-color: #333; border: 1px solid #555; color: #ffffff; }
 QMenu::item:selected { background-color: #555; }
+
+/* Barra de desplazamiento personalizada */
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+QScrollBar:vertical {
+    border: none;
+    background: #2a2a2a;
+    width: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical {
+    background: #4a4a4a;
+    min-height: 30px;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #5a5a5a;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+    background: none;
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+QScrollBar:horizontal {
+    border: none;
+    background: #2a2a2a;
+    height: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+QScrollBar::handle:horizontal {
+    background: #4a4a4a;
+    min-width: 30px;
+    border-radius: 6px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #5a5a5a;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+    background: none;
+}
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
 """
 
     def get_light_theme_stylesheet(self):
@@ -2374,7 +2880,6 @@ QProgressBar { border: 1px solid #ccc; border-radius: 3px; text-align: center; c
 QProgressBar::chunk { border-radius: 3px; }
 QTableWidget { background-color: #ffffff; color: #333333; gridline-color: #ccc; }
 QHeaderView::section { background-color: #e0e0e0; color: #333333; border: 1px solid #ccc; }
-QScrollArea { border: none; }
 QStatusBar { background-color: #e0e0e0; color: #333333; }
 QTabWidget::pane { /* The tab widget frame */ border: 1px solid #ccc; background-color: #f0f0f0; }
 QTabWidget::tab-bar { left: 5px; /* move to the right */ }
@@ -2382,6 +2887,56 @@ QTabBar::tab { background: #e0e0e0; border: 1px solid #ccc; border-bottom-color:
 QTabBar::tab:selected, QTabBar::tab:hover { background: #d0d0d0; }
 QMenu { background-color: #ffffff; border: 1px solid #ccc; color: #333333; }
 QMenu::item:selected { background-color: #e0e0e0; }
+
+/* Barra de desplazamiento personalizada */
+QScrollArea {
+    background-color: transparent;
+    border: none;
+}
+QScrollBar:vertical {
+    border: none;
+    background: #d0d0d0;
+    width: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical {
+    background: #a0a0a0;
+    min-height: 30px;
+    border-radius: 6px;
+}
+QScrollBar::handle:vertical:hover {
+    background: #909090;
+}
+QScrollBar::add-line:vertical, QScrollBar::sub-line:vertical {
+    height: 0px;
+    background: none;
+}
+QScrollBar::add-page:vertical, QScrollBar::sub-page:vertical {
+    background: none;
+}
+QScrollBar:horizontal {
+    border: none;
+    background: #d0d0d0;
+    height: 12px;
+    margin: 0px;
+    border-radius: 6px;
+}
+QScrollBar::handle:horizontal {
+    background: #a0a0a0;
+    min-width: 30px;
+    border-radius: 6px;
+}
+QScrollBar::handle:horizontal:hover {
+    background: #909090;
+}
+QScrollBar::add-line:horizontal, QScrollBar::sub-line:horizontal {
+    width: 0px;
+    background: none;
+}
+QScrollBar::add-page:horizontal, QScrollBar::sub-page:horizontal {
+    background: none;
+}
 """
 
     def init_ui(self):
@@ -2566,20 +3121,43 @@ QMenu::item:selected { background-color: #e0e0e0; }
         self.activateWindow() # Traer la ventana al frente
 
     def quit_app(self):
-        """Sale de la aplicación"""
-        # Guardar estado de ventana
+        """Sale de la aplicación - versión mejorada"""
+        print("Solicitando cierre de la aplicación...")
+        
+        # 1. Guardar estado de ventana
         self.save_window_state()
         
-        # Detener monitor
-        if hasattr(self, 'sensor_monitor'):
-            self.sensor_monitor.stop()
-            self.sensor_monitor.wait()
-        
-        # Guardar configuración
+        # 2. Guardar configuración
         self.save_config()
         
-        # Salir
+        # 3. Detener y eliminar el icono de la bandeja PRIMERO
+        if hasattr(self, 'tray_icon'):
+            print("Eliminando icono de bandeja...")
+            self.tray_icon.hide()
+            self.tray_icon.setVisible(False)
+        
+        # 4. Detener monitor de sensores de forma segura
+        if hasattr(self, 'sensor_monitor'):
+            print("Deteniendo monitor de sensores...")
+            self.sensor_monitor.stop()
+            
+            # Esperar un tiempo razonable para que termine
+            if not self.sensor_monitor.wait(2000):  # Esperar hasta 2 segundos
+                print("Forzando terminación del hilo...")
+                self.sensor_monitor.terminate()
+                self.sensor_monitor.wait()
+        
+        # 5. Forzar cierre de todas las ventanas
+        print("Cerrando ventanas...")
+        QApplication.closeAllWindows()
+        
+        # 6. Salir completamente
+        print("Saliendo de la aplicación...")
         QApplication.quit()
+        
+        # 7. Forzar salida del proceso (último recurso)
+        import os
+        os._exit(0)
 
 def main():
     """Función principal"""
